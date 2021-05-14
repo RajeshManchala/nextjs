@@ -28,5 +28,6 @@
         "src/**/*.ts",
         "src/**/*.tsx",
         "pages/_document.tsx",
+        "pages/_app.tsx",
     ]
 }

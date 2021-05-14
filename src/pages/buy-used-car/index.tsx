@@ -1,35 +1,33 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import dynamic from 'next/dynamic';
-import { NextRouter, useRouter } from 'next/dist/client/router';
+import ConditionalRendererHOC from '../../js/common/hoc/conditionalRendererHOC';
+import { getBasicApi } from '../../js/redux/actions/basicActions';
+import { getBasicApi as getDesktopApi } from '../../js/redux/actions/basicActionsDesktop';
+import basicReducer from '../../js/redux/reducers/basicReducer';
+import basicReducerDesktop from '../../js/redux/reducers/basicReducerDesktop';
 
 const DsiteHome = dynamic(() => import('../../js/desktop/buy-used-car'));
 const MsiteHome = dynamic(() => import('../../js/mobile/buy-used-car'));
 
-interface Props {
-    isMobile: boolean;
+const DesktopComponent = (props: any) => {
+    return (
+        <DsiteHome {...props} />
+    )
 }
 
-const BuyUsedCar = (props: Props): JSX.Element => {
-    console.log(props);
-    const { isMobile } = props;
-    const { query: { carMakeModel, city } }: NextRouter = useRouter();
-    return (
-        <>
-            {isMobile
-                ? (
-                    <MsiteHome
-                        carMakeModel={carMakeModel}
-                        city={city}
-                    />
-                )
-                : (
-                    <DsiteHome
-                        carMakeModel={carMakeModel}
-                        city={city}
-                    />
-                )}
-        </>
-    );
-};
+DesktopComponent.getInitialProps = async ({ store }) => {
+    store.injectReducer('basicDesktop', basicReducerDesktop);
+    await store.dispatch(getDesktopApi({}));
+}
 
-export default BuyUsedCar;
+const MobileComponent = (props: any) => {
+    return (
+        <MsiteHome {...props} />
+    )
+}
+
+MobileComponent.getInitialProps = async ({ store }) => {
+    store.injectReducer('basicMobile', basicReducer);
+    await store.dispatch(getBasicApi({}));
+}
+
+export default ConditionalRendererHOC(DesktopComponent, MobileComponent);
